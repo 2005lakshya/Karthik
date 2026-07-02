@@ -352,7 +352,7 @@ function ApplyPage() {
   const debtRange = location.state?.debtRange || '';
 
   const onThankYou = ({ firstName, leadId } = {}) => {
-    navigate('/apply/thank-you', { state: { firstName, leadId } });
+    navigate('/thank-you', { state: { firstName, leadId } });
   };
 
   return <FormPage debtRange={debtRange} onThankYou={onThankYou} />;
@@ -396,7 +396,7 @@ export default function App() {
       <Routes>
         <Route path="/"                 element={<HomePage />} />
         <Route path="/apply"            element={<ApplyPage />} />
-        <Route path="/apply/thank-you"  element={<ThankYouPage />} />
+        <Route path="/thank-you"          element={<ThankYouPage />} />
         {/* catch-all → home */}
         <Route path="*"                 element={<HomePage />} />
       </Routes>
