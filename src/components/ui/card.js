@@ -8,12 +8,26 @@ export const CardHeader = React.forwardRef(function CardHeader({ className = '',
   return <div ref={ref} className={`ui-card__header ${className}`.trim()} {...props} />;
 });
 
-export const CardTitle = React.forwardRef(function CardTitle({ className = '', ...props }, ref) {
-  return <h3 ref={ref} className={`ui-card__title ${className}`.trim()} {...props} />;
+export const CardTitle = React.forwardRef(function CardTitle(
+  { className = '', children, ...props },
+  ref
+) {
+  return (
+    <h3 ref={ref} className={`ui-card__title ${className}`.trim()} {...props}>
+      {children}
+    </h3>
+  );
 });
 
-export const CardDescription = React.forwardRef(function CardDescription({ className = '', ...props }, ref) {
-  return <p ref={ref} className={`ui-card__description ${className}`.trim()} {...props} />;
+export const CardDescription = React.forwardRef(function CardDescription(
+  { className = '', children, ...props },
+  ref
+) {
+  return (
+    <p ref={ref} className={`ui-card__description ${className}`.trim()} {...props}>
+      {children}
+    </p>
+  );
 });
 
 export const CardContent = React.forwardRef(function CardContent({ className = '', ...props }, ref) {

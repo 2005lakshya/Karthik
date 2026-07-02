@@ -1,4 +1,3 @@
-import { ArrowRight } from 'lucide-react';
 import { LOGO_URL } from '../shared/branding';
 import './Footer.css';
 
