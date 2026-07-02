@@ -231,7 +231,7 @@ const Step2 = ({ data, onChange, onNext, onBack }) => {
 /* ════════════════════════
    STEP 3 — Review & Submit
 ════════════════════════ */
-const Step3 = ({ allData, onBack, onSubmit }) => (
+const Step3 = ({ allData, onBack, onSubmit, isSubmitting }) => (
   <Card className="fp-card">
     <Progress step={3} total={3} />
     <h2 className="fp-card-title">Review Your Information</h2>
@@ -259,12 +259,18 @@ const Step3 = ({ allData, onBack, onSubmit }) => (
     </p>
 
     <div className="fp-btn-row">
-      <Button className="fp-back-btn" onClick={onBack} type="button" variant="ghost">
+      <Button className="fp-back-btn" onClick={onBack} type="button" variant="ghost"
+        disabled={isSubmitting}>
         <ArrowLeft className="fp-btn-icon" aria-hidden="true" />
         Back
       </Button>
-      <Button className="fp-submit-btn" onClick={onSubmit} type="button">
-        Submit <ArrowRight className="fp-btn-icon" aria-hidden="true" />
+      <Button
+        className="fp-submit-btn"
+        onClick={onSubmit}
+        type="button"
+        disabled={isSubmitting}
+      >
+        {isSubmitting ? 'Submitting…' : <>Submit <ArrowRight className="fp-btn-icon" aria-hidden="true" /></>}
       </Button>
     </div>
   </Card>
@@ -286,9 +292,10 @@ const stepTransition = { duration: 0.32, ease: [0.22, 1, 0.36, 1] };
 ════════════════════════ */
 export default function FormPage({ debtRange, onThankYou }) {
   const [step, setStep] = useState(1);
-  const [direction, setDirection] = useState(1); // 1 = forward, -1 = back
+  const [direction, setDirection] = useState(1);
   const [touched, setTouched] = useState({});
   const [submitAttempted, setSubmitAttempted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     debtRange: debtRange || '',
     firstName: '', lastName: '', phone: '', email: '', province: '',
@@ -315,6 +322,10 @@ export default function FormPage({ debtRange, onThankYou }) {
   };
 
   const submit = async () => {
+    // Prevent double-submit
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+
     const payload = {
       first_name: formData.firstName,
       last_name:  formData.lastName,
@@ -333,8 +344,10 @@ export default function FormPage({ debtRange, onThankYou }) {
       onThankYou({ firstName: formData.firstName, leadId: lead?.id || null });
     } catch (error) {
       console.error('Failed to submit lead:', error);
-      // Still navigate to thank you — don't block the user on a network error
+      // Still navigate on error so user isn't stuck
       onThankYou({ firstName: formData.firstName, leadId: null });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -394,7 +407,7 @@ export default function FormPage({ debtRange, onThankYou }) {
                 exit="exit"
                 transition={stepTransition}
               >
-                <Step3 allData={formData} onBack={back} onSubmit={submit} />
+                <Step3 allData={formData} onBack={back} onSubmit={submit} isSubmitting={isSubmitting} />
               </motion.div>
             )}
           </AnimatePresence>

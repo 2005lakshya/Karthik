@@ -1,5 +1,6 @@
 import './App.css';
 import { useState, useEffect, useRef } from 'react';
+import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import { motion, useInView, AnimatePresence } from 'framer-motion';
 import { ArrowRight, CheckCircle2, Phone, Star } from 'lucide-react';
 import Footer from './components/Footer';
@@ -8,26 +9,23 @@ import ThankYou from './ThankYou';
 import { GOOGLE_LOGO_URL, LOGO_URL } from './shared/branding';
 
 /* ─────────────────────────────────────────
-   Shared animation variants
+   Animation variants
 ───────────────────────────────────────── */
 const fadeUp = {
   hidden:  { opacity: 0, y: 24 },
   visible: { opacity: 1, y: 0 },
 };
-
 const staggerContainer = {
   hidden:  {},
   visible: { transition: { staggerChildren: 0.07 } },
 };
-
 const scaleIn = {
   hidden:  { opacity: 0, scale: 0.95 },
   visible: { opacity: 1, scale: 1 },
 };
 
 /* ─────────────────────────────────────────
-   FadeInSection — reusable scroll-triggered
-   wrapper using useInView
+   FadeInSection
 ───────────────────────────────────────── */
 function FadeInSection({ children, delay = 0, className }) {
   const ref = useRef(null);
@@ -47,7 +45,7 @@ function FadeInSection({ children, delay = 0, className }) {
 }
 
 /* ─────────────────────────────────────────
-   StaggerSection — stagger-reveals children
+   StaggerSection
 ───────────────────────────────────────── */
 function StaggerSection({ children, className }) {
   const ref = useRef(null);
@@ -65,7 +63,7 @@ function StaggerSection({ children, className }) {
   );
 }
 
-/* ── tiny star component ── */
+/* ── Stars ── */
 const Stars = ({ count = 5 }) => (
   <span className="stars">
     {Array.from({ length: count }).map((_, i) => (
@@ -74,73 +72,52 @@ const Stars = ({ count = 5 }) => (
   </span>
 );
 
-function App() {
-  // 'home' | 'form' | 'thankyou'
-  const [page, setPage] = useState('home');
-  const [debtRange, setDebtRange] = useState('');
-  const [userName, setUserName] = useState('');
-  const [leadId, setLeadId] = useState(null);
+/* ─────────────────────────────────────────
+   ScrollToTop — fires on every route change
+───────────────────────────────────────── */
+function ScrollToTop() {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    if (window.__lenis) window.__lenis.scrollTo(0, { immediate: true });
+    else window.scrollTo({ top: 0 });
+  }, [pathname]);
+  return null;
+}
+
+/* ═══════════════════════════════════════
+   HOME PAGE  →  /
+═══════════════════════════════════════ */
+function HomePage() {
+  const navigate = useNavigate();
   const [selectedDebt, setSelectedDebt] = useState('');
 
-  // ── Navbar: hide on scroll down, show on scroll up ──
+  /* navbar hide/show on scroll */
   const [navVisible, setNavVisible] = useState(true);
   const lastScrollY = useRef(0);
   useEffect(() => {
     const onScroll = () => {
-      const current = window.scrollY;
-      setNavVisible(current < lastScrollY.current || current < 60);
-      lastScrollY.current = current;
+      const y = window.scrollY;
+      setNavVisible(y < lastScrollY.current || y < 60);
+      lastScrollY.current = y;
     };
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  // ── Sticky CTA: show after hero section leaves view ──
+  /* sticky CTA after hero */
   const heroRef = useRef(null);
   const [ctaVisible, setCtaVisible] = useState(false);
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => { setCtaVisible(!entry.isIntersecting); },
+    const obs = new IntersectionObserver(
+      ([entry]) => setCtaVisible(!entry.isIntersecting),
       { threshold: 0 }
     );
-    if (heroRef.current) observer.observe(heroRef.current);
-    return () => observer.disconnect();
+    if (heroRef.current) obs.observe(heroRef.current);
+    return () => obs.disconnect();
   }, []);
 
-  const goToForm = (range) => {
-    setDebtRange(range || selectedDebt);
-    setPage('form');
-    // Use Lenis if available, fall back to native
-    if (window.__lenis) window.__lenis.scrollTo(0, { immediate: true });
-    else window.scrollTo({ top: 0 });
-  };
-
-  const goToThankYou = ({ firstName, leadId: submissionId } = {}) => {
-    setUserName(firstName || '');
-    setLeadId(submissionId || null);
-    setPage('thankyou');
-    if (window.__lenis) window.__lenis.scrollTo(0, { immediate: true });
-    else window.scrollTo({ top: 0 });
-  };
-
-  // ── Render non-home pages ──
-  if (page === 'form') {
-    return (
-      <FormPage
-        debtRange={debtRange}
-        onThankYou={(name) => goToThankYou(name)}
-      />
-    );
-  }
-  if (page === 'thankyou') {
-    return (
-      <ThankYou
-        name={userName}
-        leadId={leadId}
-        onFindSolution={() => goToForm('')}
-      />
-    );
-  }
+  const goToForm = (range) =>
+    navigate('/apply', { state: { debtRange: range || selectedDebt } });
 
   return (
     <div className="app">
@@ -163,38 +140,38 @@ function App() {
       {/* ── HERO ── */}
       <div className="hero-wrapper" ref={heroRef}>
         <section className="hero">
-          {/* Left copy — staggered children */}
           <motion.div
             className="hero-left"
             variants={staggerContainer}
             initial="hidden"
             animate="visible"
           >
-            <motion.h1 className="hero-heading" variants={fadeUp} transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}>
+            <motion.h1 className="hero-heading" variants={fadeUp}
+              transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}>
               Canadians Are Reducing Their Debt by{' '}
               <span className="highlight">60–80%</span>
             </motion.h1>
-            <motion.p className="hero-sub" variants={fadeUp} transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}>
+            <motion.p className="hero-sub" variants={fadeUp}
+              transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}>
               A free, confidential assessment can help you understand where you
               stand and what may apply based on your situation.
             </motion.p>
-            <motion.blockquote className="hero-quote" variants={fadeUp} transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}>
+            <motion.blockquote className="hero-quote" variants={fadeUp}
+              transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}>
               "Over <strong>125,000 Canadians</strong> went through this process last year."
             </motion.blockquote>
             <motion.ul className="hero-checklist" variants={staggerContainer}>
-              {[
-                'Takes about 2 minutes',
-                'No credit check to get started',
-                'No obligation',
-                'Private and confidential',
-              ].map((item) => (
-                <motion.li key={item} variants={fadeUp} transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}>
+              {['Takes about 2 minutes','No credit check to get started','No obligation','Private and confidential']
+                .map((item) => (
+                <motion.li key={item} variants={fadeUp}
+                  transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}>
                   <CheckCircle2 className="check-icon" aria-hidden="true" />
                   {item}
                 </motion.li>
               ))}
             </motion.ul>
-            <motion.div className="google-badge" variants={fadeUp} transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}>
+            <motion.div className="google-badge" variants={fadeUp}
+              transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}>
               <img src={GOOGLE_LOGO_URL} alt="Google" className="google-badge-logo-img" />
               <div className="google-badge-info">
                 <span className="badge-excellent">Excellent</span>
@@ -204,7 +181,7 @@ function App() {
             </motion.div>
           </motion.div>
 
-          {/* Debt card — scale + fade in */}
+          {/* Debt card */}
           <motion.div
             className="debt-card"
             variants={scaleIn}
@@ -226,7 +203,7 @@ function App() {
                 className={`debt-option${selectedDebt === opt.value ? ' selected' : ''}`}
                 onClick={() => setSelectedDebt(opt.value)}
               >
-                <span className={`radio-circle${selectedDebt === opt.value ? ' filled' : ''}`}></span>
+                <span className={`radio-circle${selectedDebt === opt.value ? ' filled' : ''}`} />
                 {opt.label}
               </label>
             ))}
@@ -248,7 +225,6 @@ function App() {
             <p className="section-tag">How it works</p>
             <h2 className="hiw-heading">Getting help is simpler than you think</h2>
           </FadeInSection>
-
           <StaggerSection className="hiw-right">
             {[
               { n: 1, tag: 'Step one',   title: 'Quick Chat',
@@ -258,12 +234,8 @@ function App() {
               { n: 3, tag: 'Step three', title: 'You Pay Way Less',
                 body: 'Most people pay 20—40 cents on the dollar through one affordable monthly payment.' },
             ].map(step => (
-              <motion.div
-                key={step.n}
-                className="step-card"
-                variants={fadeUp}
-                transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-              >
+              <motion.div key={step.n} className="step-card" variants={fadeUp}
+                transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}>
                 <div className="step-num">{step.n}</div>
                 <div>
                   <p className="step-tag">{step.tag}</p>
@@ -282,7 +254,6 @@ function App() {
           <h2 className="dt-heading">Types of Debt we can help with</h2>
           <p className="dt-sub">Debt specialists can help with almost any unsecured debt:</p>
         </FadeInSection>
-
         <StaggerSection className="dt-grid">
           {[
             { icon: '💳', label: 'Credit Cards',     sub: 'High-interest balances', color: '#e53935', bg: '#fde8e8' },
@@ -295,13 +266,9 @@ function App() {
             { icon: '🏛️', label: 'Government Debt',  sub: 'Government arrears',     color: '#3949ab', bg: '#e8eaf6' },
             { icon: '💡', label: 'Utility Bills',    sub: 'Overdue utilities',      color: '#00897b', bg: '#e0f2f1' },
           ].map((item) => (
-            <motion.div
-              key={item.label}
-              className="dt-card"
-              style={{ '--accent': item.color }}
-              variants={fadeUp}
-              transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-            >
+            <motion.div key={item.label} className="dt-card"
+              style={{ '--accent': item.color }} variants={fadeUp}
+              transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}>
               <div className="dt-icon" style={{ background: item.bg, color: item.color }}>{item.icon}</div>
               <div>
                 <p className="dt-name">{item.label}</p>
@@ -318,12 +285,9 @@ function App() {
           <h2 className="rv-heading">Trusted by Canadians Coast to Coast</h2>
           <div className="rv-google-bar">
             <span className="google-logo large">
-              <span style={{color:'#4285F4'}}>G</span>
-              <span style={{color:'#EA4335'}}>o</span>
-              <span style={{color:'#FBBC05'}}>o</span>
-              <span style={{color:'#4285F4'}}>g</span>
-              <span style={{color:'#34A853'}}>l</span>
-              <span style={{color:'#EA4335'}}>e</span>
+              <span style={{color:'#4285F4'}}>G</span><span style={{color:'#EA4335'}}>o</span>
+              <span style={{color:'#FBBC05'}}>o</span><span style={{color:'#4285F4'}}>g</span>
+              <span style={{color:'#34A853'}}>l</span><span style={{color:'#EA4335'}}>e</span>
             </span>
             <Stars />
             <span className="rv-score">4.9/5</span>
@@ -331,7 +295,6 @@ function App() {
             <span className="rv-verified">Verified Customers</span>
           </div>
         </FadeInSection>
-
         <StaggerSection className="rv-grid">
           {[
             { text: '"I found this experience very helpful and he sure took a load off my shoulders. He was very friendly and did not make me feel ashamed or at all. Bob Singh was just a pleasure to talk to!"',
@@ -341,12 +304,8 @@ function App() {
             { text: '"Andy Goss was an amazing Representative and he made my day the best day ever by taking away the stress that I persevered! Thank you Andy, for your patience and attendance of taking care of my situation the best way possible! We need more people like you helping others in situations like mine! You are a God send in mine! Thanks again!"',
               name: 'Jenny Ali.', location: 'Calgary, AB' },
           ].map((rv) => (
-            <motion.div
-              key={rv.name}
-              className="rv-card"
-              variants={fadeUp}
-              transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-            >
+            <motion.div key={rv.name} className="rv-card" variants={fadeUp}
+              transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}>
               <p className="rv-text">{rv.text}</p>
               <div className="rv-footer">
                 <p className="rv-name">{rv.name}</p>
@@ -360,7 +319,7 @@ function App() {
 
       <Footer onCtaClick={() => goToForm('')} />
 
-      {/* ── STICKY FLOATING CTA — appears after hero leaves view ── */}
+      {/* ── STICKY CTA ── */}
       <AnimatePresence>
         {ctaVisible && (
           <motion.div
@@ -379,9 +338,68 @@ function App() {
           </motion.div>
         )}
       </AnimatePresence>
-
     </div>
   );
 }
 
-export default App;
+/* ═══════════════════════════════════════
+   FORM PAGE wrapper  →  /apply
+   Reads debtRange from location.state
+═══════════════════════════════════════ */
+function ApplyPage() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const debtRange = location.state?.debtRange || '';
+
+  const onThankYou = ({ firstName, leadId } = {}) => {
+    navigate('/apply/thank-you', { state: { firstName, leadId } });
+  };
+
+  return <FormPage debtRange={debtRange} onThankYou={onThankYou} />;
+}
+
+/* ═══════════════════════════════════════
+   THANK YOU PAGE  →  /apply/thank-you
+   Guard: redirect to / if accessed directly without form state
+═══════════════════════════════════════ */
+function ThankYouPage() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { firstName, leadId } = location.state || {};
+
+  // If someone navigates here directly (no state), send them home
+  useEffect(() => {
+    if (!location.state) {
+      navigate('/', { replace: true });
+    }
+  }, [location.state, navigate]);
+
+  // Don't render until guard passes
+  if (!location.state) return null;
+
+  return (
+    <ThankYou
+      name={firstName}
+      leadId={leadId}
+      onFindSolution={() => navigate('/apply')}
+    />
+  );
+}
+
+/* ═══════════════════════════════════════
+   ROOT APP — wires up all routes
+═══════════════════════════════════════ */
+export default function App() {
+  return (
+    <>
+      <ScrollToTop />
+      <Routes>
+        <Route path="/"                 element={<HomePage />} />
+        <Route path="/apply"            element={<ApplyPage />} />
+        <Route path="/apply/thank-you"  element={<ThankYouPage />} />
+        {/* catch-all → home */}
+        <Route path="*"                 element={<HomePage />} />
+      </Routes>
+    </>
+  );
+}
