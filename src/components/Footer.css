@@ -1,0 +1,105 @@
+.site-footer {
+  background: #1a2ecc;
+  padding: 56px 32px 48px;
+  margin-top: auto;
+}
+
+.site-footer-inner {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.site-footer-logo-wrap {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 0;
+}
+
+.site-footer-logo-img {
+  display: block;
+  width: 210px;
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+
+.site-footer-divider {
+  border: none;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.18);
+  margin: 32px 0 28px;
+}
+
+.site-footer-text {
+  text-align: left;
+}
+
+.site-footer-copy {
+  color: rgba(255, 255, 255, 0.88);
+  font-size: 0.92rem;
+  margin-bottom: 20px;
+}
+
+.site-footer-disc {
+  color: rgba(255, 255, 255, 0.52);
+  font-size: 0.8rem;
+  line-height: 1.7;
+  margin-bottom: 12px;
+}
+
+.site-footer-disc:last-of-type {
+  margin-bottom: 0;
+}
+
+.site-footer-cta-wrap {
+  margin-top: 36px;
+  display: flex;
+  justify-content: center;
+}
+
+.site-footer-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  max-width: 700px;
+  background: #1a6dff;
+  color: #fff;
+  border: none;
+  padding: 18px 32px;
+  border-radius: 50px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: 'Plus Jakarta Sans', 'Segoe UI', sans-serif;
+  transition: background 0.2s, box-shadow 0.2s;
+  box-shadow: 0 8px 28px rgba(26, 109, 255, 0.45);
+  letter-spacing: 0.3px;
+}
+
+.site-footer-cta:hover {
+  background: #0550cc;
+  box-shadow: 0 10px 32px rgba(26, 109, 255, 0.6);
+}
+
+.site-footer-cta-icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+@media (max-width: 560px) {
+  .site-footer {
+    padding: 48px 20px 40px;
+  }
+
+  .site-footer-logo-img {
+    width: 150px;
+  }
+
+  .site-footer-cta {
+    font-size: 1rem;
+    padding: 16px 24px;
+  }
+}
