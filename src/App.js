@@ -148,8 +148,8 @@ function HomePage() {
           >
             <motion.h1 className="hero-heading" variants={fadeUp}
               transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}>
-              Canadians Are Reducing Their Debt by{' '}
-              <span className="highlight">60–80%</span>
+              Canadians Are Reducing<br />
+              Their Debt by <span className="highlight">60–80%</span>
             </motion.h1>
             <motion.p className="hero-sub" variants={fadeUp}
               transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}>
@@ -158,7 +158,7 @@ function HomePage() {
             </motion.p>
             <motion.blockquote className="hero-quote" variants={fadeUp}
               transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}>
-              "Over <strong>125,000 Canadians</strong> went through this process last year."
+              "Over 125,000 Canadians went through this process last year."
             </motion.blockquote>
             <motion.ul className="hero-checklist" variants={staggerContainer}>
               {['Takes about 2 minutes','No credit check to get started','No obligation','Private and confidential']
